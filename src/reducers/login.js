@@ -1,30 +1,40 @@
-const initialState = {
-  user: [],
-  userLoginFetched: false,
-  isFetching: false,
-  error: false,
-};
-
-export default (state = initialState, action) => {
+// The auth reducer. The starting state sets authentication
+// based on a token being in local storage. In a real app,
+// we would also want a util to check if the token is expired.
+export default (
+  state = {
+    isFetching: false,
+    isAuthenticated: !!localStorage.getItem('id_token'),
+    token: null,
+    user: null,
+  },
+  action,
+) => {
   switch (action.type) {
-    case 'FETCHING_USER_LOGIN':
-      return {
-        ...state,
-        user: [],
+    case 'LOGIN_REQUEST':
+      return Object.assign({}, state, {
         isFetching: true,
-      };
-    case 'FETCHING_USER_LOGIN_SUCCESS':
-      return {
-        ...state,
+        isAuthenticated: false,
+        user: action.creds,
+      });
+    case 'LOGIN_SUCCESS':
+      console.log(action);
+      return Object.assign({}, state, {
         isFetching: false,
-        user: action.data,
-      };
-    case 'FETCHING_USER_LOGIN_FAILURE':
-      return {
-        ...state,
+        isAuthenticated: true,
+        token: action.user.token,
+      });
+    case 'LOGIN_FAILURE':
+      return Object.assign({}, state, {
         isFetching: false,
-        error: true,
-      };
+        isAuthenticated: false,
+        errorMessage: action.message,
+      });
+    case 'LOGOUT_SUCCESS':
+      return Object.assign({}, state, {
+        isFetching: true,
+        isAuthenticated: false,
+      });
     default:
       return state;
   }
